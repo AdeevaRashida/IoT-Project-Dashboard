@@ -13,15 +13,6 @@ class DashboardController extends Controller
         $weight = $request->input('weight', 0);
         $time = now()->timezone('Asia/Jakarta')->format('H:i');
         $petName = $request->input('pet_name', session('pet_name', 'Anabul'));
-
-        $message = "🐾 *PawFeeder Alert!*\n\n"
-            . "✅ {$petName} baru saja diberi makan!\n"
-            . "🍽️ Porsi: {$portion}g\n"
-            . "⚖️ Sisa makanan: {$weight}g\n"
-            . "🕐 Waktu: {$time} WIB\n\n"
-            . "_Pesan otomatis dari PawFeeder_ 🤖";
-
-
         $uid = session('firebase_uid');
 
         //default hp
@@ -30,12 +21,27 @@ class DashboardController extends Controller
         if ($uid) {
             $firebaseUrl = config('services.firebase.database_url');
 
-            $response = Http::get("{$firebaseUrl}/users/{$uid}/profile/no_hp.json");
+            $response = Http::get("{$firebaseUrl}/users/{$uid}/profile.json");
 
             if ($response->successful() && $response->json() !== null) {
-                $targetPhone = $response->json();
+                $profile = $response->json();
+                
+                if (isset($profile['no_hp'])) {
+                    $targetPhone = $profile['no_hp'];
+                }
+                
+                if (isset($profile['pet_name'])) {
+                    $petName = $profile['pet_name'];
+                }
             }
         }
+
+        $message = "🐾 *PawFeeder Alert!*\n\n"
+            . "✅ {$petName} baru saja diberi makan!\n"
+            . "🍽️ Porsi: {$portion}g\n"
+            . "⚖️ Sisa makanan: {$weight}g\n"
+            . "🕐 Waktu: {$time} WIB\n\n"
+            . "_Pesan otomatis dari PawFeeder_ 🤖";
 
         Http::withHeaders([
             'Authorization' => config('services.fonnte.token')
@@ -51,16 +57,7 @@ class DashboardController extends Controller
     {
         $weight = $request->input('weight', 0);
         $time = now()->timezone('Asia/Jakarta')->format('H:i');
-        $petName = $request->input('pet_name', session('pet_name', 'Anabul'));
-
-        $message = "⚠️ *PawFeeder Alert!*\n\n"
-            . "🪣 Stok makanan {$petName} hampir habis!\n"
-            . "📦 Sisa: {$weight}g\n"
-            . "🕐 Waktu: {$time} WIB\n\n"
-            . "Segera isi ulang makanan! 🙏\n\n"
-            . "_Pesan otomatis dari PawFeeder_ 🤖";
-
-            
+        $petName = $request->input('pet_name', session('pet_name', 'Anabul')); 
         $uid = session('firebase_uid');
 
         //default hp
@@ -69,12 +66,27 @@ class DashboardController extends Controller
         if ($uid) {
             $firebaseUrl = config('services.firebase.database_url');
 
-            $response = Http::get("{$firebaseUrl}/users/{$uid}/profile/no_hp.json");
+            $response = Http::get("{$firebaseUrl}/users/{$uid}/profile.json");
 
             if ($response->successful() && $response->json() !== null) {
-                $targetPhone = $response->json();
+                $profile = $response->json();
+                
+                if (isset($profile['no_hp'])) {
+                    $targetPhone = $profile['no_hp'];
+                }
+                
+                if (isset($profile['pet_name'])) {
+                    $petName = $profile['pet_name'];
+                }
             }
         }
+
+        $message = "⚠️ *PawFeeder Alert!*\n\n"
+            . "🪣 Stok makanan {$petName} hampir habis!\n"
+            . "📦 Sisa: {$weight}g\n"
+            . "🕐 Waktu: {$time} WIB\n\n"
+            . "Segera isi ulang makanan! 🙏\n\n"
+            . "_Pesan otomatis dari PawFeeder_ 🤖";
 
         Http::withHeaders([
             'Authorization' => config('services.fonnte.token')

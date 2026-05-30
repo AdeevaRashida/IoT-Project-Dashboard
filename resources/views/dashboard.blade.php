@@ -1145,24 +1145,6 @@
 
 <body>
 
-    <div id="deviceLockOverlay" class="device-lock-overlay" style="display: none;">
-        //lupa tambahin style="background: d4cfc6"
-        <div class="device-lock-card">
-            <div class="icon">🔗</div>
-            <h3>Hubungkan PawFeeder</h3>
-            <p>Masukkan Serial Number (Device ID) dari mesin PawFeeder kamu untuk mulai memantau dan mengatur jadwal.
-            </p>
-            <div class="modal-field">
-                <input type="text" id="deviceIdInput" placeholder="pawfeederXXX" />
-            </div>
-            <p id="deviceErrorMsg"
-                style="color: var(--danger); font-size: 12px; display: none; margin-top: -5px; margin-bottom: 15px; text-align: left;">
-            </p>
-            <button style="background: linear-gradient(135deg, var(--primary), #e8a050)"
-                onclick="connectDevice()">Hubungkan Pawfeeder</button>
-        </div>
-    </div>
-
     <!-- Mobile Header -->
     <div class="mobile-header">
         <button class="hamburger" onclick="toggleSidebar()">
@@ -1173,6 +1155,7 @@
         <span style="font-weight:700;color:var(--primary)">🐾 PawFeeder</span>
         <div class="connection-badge"><span class="connection-dot pulse-soft"></span> Online</div>
     </div>
+
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
@@ -1227,7 +1210,7 @@
         <div class="sidebar-pet">
             <img src="{{ asset('images/doge-dog.png') }}" alt="Pet" class="float">
             <p style="font-size:11px;color:var(--text-muted);margin-top:8px">
-                <span class="pet-name">{{ $petName ?? 'Mochi' }}</span> is happy! 🐶
+                <span class="pet-name">Mochi</span> is happy! 🐶
             </p>
         </div>
     </aside>
@@ -1477,33 +1460,80 @@
         </div>
     </div>
 
-    <!-- Background Decorations -->
     <div class="pet-deco top-right"><img src="{{ asset('images/matcha-cat.png') }}" alt="" class="float"></div>
     <div class="pet-deco bottom-left"><img src="{{ asset('images/paw-prints.png') }}" alt="" class="wiggle"></div>
 
-    <!-- Modal Nama Pet -->
-    <div class="modal-overlay" id="petNameModal" style="z-index:999">
-        <div class="modal" style="text-align:center">
-            <div style="margin-bottom:12px">
-                <img src="{{ asset('images/siapa.png') }}" style="width:56px;height:56px;object-fit:contain;">
+    // modal kalau user baru regist (gaada nama anabul, no_hp, dkk)
+    <div class="modal-overlay" id="petNameModal" style="z-index:999; display: none;">
+        <div class="modal" style="text-align:center; background: #d4cfc6;">
+
+            <div id="stepPetName">
+                <div style="margin-bottom:12px">
+                    <img src="{{ asset('images/siapa.png') }}" style="width:56px;height:56px;object-fit:contain;">
+                </div>
+                <div class="modal-title" style="justify-content:center;font-size:22px">
+                    Nǐ hǎo! Siapa nama anabulmu? :D
+                </div>
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">
+                    Masukkan nama anabul gemasmu tuk memulai!
+                </p>
+                <div class="modal-field">
+                    <input type="text" id="petNameInput" placeholder="cth: Mochi, Bruno, Luna..."
+                        style="text-align:center;font-size:16px">
+                </div>
+                <div id="petNameError"
+                    style="color:var(--danger);font-size:12px;margin-top:-8px;margin-bottom:8px;display:none">
+                    Nama tidak boleh kosong!
+                </div>
+                <button class="btn-save" style="width:100%;margin-top:8px" onclick="submitPetName()">
+                    Next!
+                </button>
             </div>
-            <div class="modal-title" style="justify-content:center;font-size:22px">
-                Nǐ hǎo! Siapa nama anabulmu? :D
+
+            <div id="stepPhone" style="display: none;">
+                <div class="icon" style="font-size: 40px; margin-bottom: 12px;">📱</div>
+                <div class="modal-title" style="justify-content:center;font-size:22px; margin-bottom: 10px;">
+                    Nomor WhatsApp
+                </div>
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">
+                    Masukkan nomor HP untuk menerima notifikasi otomatis saat anabulmu makan atau stok habis.
+                </p>
+                <div class="modal-field">
+                    <input type="tel" id="phoneInput" placeholder="cth: 081234567890"
+                        style="text-align:center;font-size:16px" />
+                </div>
+                <div id="phoneErrorMsg"
+                    style="color: var(--danger); font-size: 12px; display: none; margin-top: -8px; margin-bottom: 8px;">
+                    Nomor HP tidak boleh kosong!
+                </div>
+                <button class="btn-save" style="width:100%; margin-top:8px" onclick="submitPhone()">
+                    Next!
+                </button>
             </div>
-            <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">
-                Masukkan nama anabul gemasmu tuk memulai!
-            </p>
-            <div class="modal-field">
-                <input type="text" id="petNameInput" placeholder="cth: Mochi, Bruno, Luna..."
-                    style="text-align:center;font-size:16px">
+
+            <div id="stepDeviceLock" style="display: none;">
+                <div class="icon" style="font-size: 40px; margin-bottom: 12px;">🔗</div>
+                <div class="modal-title" style="justify-content:center;font-size:22px; margin-bottom: 10px;">
+                    Hubungkan PawFeeder
+                </div>
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">
+                    Masukkan Serial Number (Device ID) dari mesin PawFeeder kamu.
+                </p>
+                <div class="modal-field">
+                    <input type="text" id="deviceIdInput" placeholder="pawfeederXXX"
+                        style="text-align:center;font-size:16px" />
+                </div>
+                <div id="deviceErrorMsg"
+                    style="color: var(--danger); font-size: 12px; display: none; margin-top: -8px; margin-bottom: 8px;">
+                    Device ID tidak boleh kosong!
+                </div>
+                <button class="btn-save"
+                    style="width:100%; margin-top:8px; background: linear-gradient(135deg, var(--primary), #e8a050)"
+                    onclick="connectDevice()">
+                    Mulai Pawfeeder!
+                </button>
             </div>
-            <div id="petNameError"
-                style="color:var(--danger);font-size:12px;margin-top:-8px;margin-bottom:8px;display:none">
-                Nama tidak boleh kosong!
-            </div>
-            <button class="btn-save" style="width:100%;margin-top:8px" onclick="submitPetName()">
-                Next!
-            </button>
+
         </div>
     </div>
 
@@ -1513,13 +1543,13 @@
 
         // ===== FIREBASE CONFIG =====
         const firebaseConfig = {
-            apiKey: "{{ config('services.firebase.api_key') }}",
-            authDomain: "{{ config('services.firebase.auth_domain') }}",
-            projectId: "{{ config('services.firebase.project_id') }}",
-            storageBucket: "{{ config('services.firebase.storage_bucket') }}",
-            messagingSenderId: "{{ config('services.firebase.messaging_sender_id') }}",
-            appId: "{{ config('services.firebase.app_id') }}",
-            databaseURL: "{{ config('services.firebase.database_url') }}"
+            apiKey: "{{ env('FIREBASE_API_KEY') }}",
+            authDomain: "{{ env('FIREBASE_AUTH_DOMAIN') }}",
+            projectId: "{{ env('FIREBASE_PROJECT_ID') }}",
+            storageBucket: "{{ env('FIREBASE_STORAGE_BUCKET') }}",
+            messagingSenderId: "{{ env('FIREBASE_MESSAGING_SENDER_ID') }}",
+            appId: "{{ env('FIREBASE_APP_ID') }}",
+            databaseURL: "{{ env('FIREBASE_DATABASE_URL') }}"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -1531,42 +1561,7 @@
 
         const userRef = (path) => ref(db, `users/${uid}/${path}`);
 
-        // COnnection Modal
-        onValue(ref(db, 'users/' + uid + '/deviceId'), (snapshot) => {
-            const deviceId = snapshot.val();
-            const overlay = document.getElementById('deviceLockOverlay');
-
-            if (deviceId) {
-                if (overlay) overlay.style.display = 'none';
-            } else {
-                if (overlay) overlay.style.display = 'flex';
-            }
-        });
-
-        // Hubungin Pawfeeder
-        window.connectDevice = async function () {
-            const input = document.getElementById('deviceIdInput').value.trim();
-            const errorMsg = document.getElementById('deviceErrorMsg');
-
-            if (!input) {
-                errorMsg.textContent = "Device ID tidak boleh kosong!";
-                errorMsg.style.display = 'block';
-                return;
-            }
-
-            try {
-                errorMsg.style.display = 'none';
-
-                await set(ref(db, 'devices/' + input + '/ownerUid'), uid);
-
-                await set(ref(db, 'users/' + uid + '/deviceId'), input);
-
-            } catch (error) {
-                console.error("Error connecting device:", error);
-                errorMsg.textContent = "Gagal menghubungkan. Silakan coba lagi.";
-                errorMsg.style.display = 'block';
-            }
-        }
+        let petName = 'Anabul';
 
         // Profile Photo
         async function loadPhoto() {
@@ -2008,27 +2003,52 @@
             }
         });
 
-        // ===== PET NAME MODAL =====
-        let petName = "Anabul";
+        //modal logic
 
-        const petNameRef = ref(db, `users/${uid}/profile/pet_name`);
+        onValue(userRef(''), (snapshot) => {
+            const data = snapshot.val() || {};
+            const profile = data.profile || {};
 
-        onValue(petNameRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                petName = data;
-                // 3. Update all UI elements that display the pet name
+            petName = profile.pet_name || "Anabul";
+            const noHp = profile.phone;
+            const deviceId = data.deviceId;
+
+            const modalOverlay = document.getElementById('petNameModal');
+
+            if (petName) {
                 document.querySelectorAll('.pet-name').forEach(el => {
-                    el.textContent = data;
+                    el.textContent = petName;
                 });
-                console.log("Pet Name updated from Firebase:", data);
             } else {
-                // If the name doesn't exist, trigger your naming modal
-                document.getElementById('petNameModal').classList.add('open');
+                document.querySelectorAll('.pet-name').forEach(el => {
+                    el.textContent = "Anabul";
+                });
+            }
+
+            if (!petName) {
+                modalOverlay.style.display = 'flex';
+                showOnlyStep('stepPetName');
+            } else if (!noHp) {
+                modalOverlay.style.display = 'flex';
+                showOnlyStep('stepPhone');
+            } else if (!deviceId) {
+                modalOverlay.style.display = 'flex';
+                showOnlyStep('stepDeviceLock');
+            } else {
+                modalOverlay.style.display = 'none';
             }
         });
 
-        window.submitPetName = function () {
+        function showOnlyStep(stepId) {
+            document.getElementById('stepPetName').style.display = 'none';
+            document.getElementById('stepPhone').style.display = 'none';
+            document.getElementById('stepDeviceLock').style.display = 'none';
+
+            document.getElementById(stepId).style.display = 'block';
+        }
+
+
+        window.submitPetName = async function () {
             const name = document.getElementById('petNameInput').value.trim();
             if (!name) {
                 document.getElementById('petNameError').style.display = 'block';
@@ -2036,15 +2056,63 @@
             }
             document.getElementById('petNameError').style.display = 'none';
 
-            set(ref(db, `users/${uid}/profile/pet_name`), name)
-                .then(() => {
-                    console.log("Nama berhasil disimpan ke Firebase!");
-                    document.getElementById('petNameModal').classList.remove('open');
-                })
-                .catch((error) => {
-                    console.error("Gagal menyimpan:", error);
-                });
+            try {
+                await set(ref(db, `users/${uid}/profile/pet_name`), name);
+                console.log("Nama berhasil disimpan!");
+                // Catatan: Kita tidak perlu memanggil showOnlyStep() lagi di sini, 
+                // karena onValue di atas akan otomatis mendeteksi perubahan dan memindahkan stepnya!
+            } catch (error) {
+                console.error("Gagal menyimpan nama:", error);
+            }
         }
+
+        window.submitPhone = async function () {
+            const phone = document.getElementById('phoneInput').value.trim();
+            const errorMsg = document.getElementById('phoneErrorMsg');
+
+            if (!phone) {
+                errorMsg.textContent = "Nomor HP tidak boleh kosong!";
+                errorMsg.style.display = 'block';
+                return;
+            }
+            errorMsg.style.display = 'none';
+
+            try {
+                await set(ref(db, `users/${uid}/profile/phone`), phone);
+                console.log("Nomor HP berhasil disimpan!");
+            } catch (error) {
+                console.error("Gagal menyimpan no HP:", error);
+                errorMsg.textContent = "Terjadi kesalahan. Coba lagi.";
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        window.connectDevice = async function () {
+            const input = document.getElementById('deviceIdInput').value.trim();
+            const errorMsg = document.getElementById('deviceErrorMsg');
+
+            if (!input) {
+                errorMsg.textContent = "Device ID tidak boleh kosong!";
+                errorMsg.style.display = 'block';
+                return;
+            }
+            errorMsg.style.display = 'none';
+
+            try {
+                await set(ref(db, 'devices/' + input + '/ownerUid'), uid);
+                await set(ref(db, 'users/' + uid + '/deviceId'), input);
+
+                console.log("Device berhasil terhubung!");
+                alert("PawFeeder siap digunakan! 🐾");
+
+            } catch (error) {
+                console.error("Error connecting device:", error);
+                errorMsg.textContent = "Gagal menghubungkan. Silakan coba lagi.";
+                errorMsg.style.display = 'block';
+            }
+        }
+
+
     </script>
 
 </body>
