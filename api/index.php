@@ -25,11 +25,18 @@ try {
     require __DIR__ . '/../public/index.php';
 } catch (\Throwable $e) {
     header('Content-Type: application/json');
+    
+    $akarMasalah = $e;
+    while ($akarMasalah->getPrevious() !== null) {
+        $akarMasalah = $akarMasalah->getPrevious();
+    }
+
     echo json_encode([
-        'status' => 'Pesan Error Asli Terbongkar!',
-        'error_message' => $e->getMessage(),
-        'file_penyebab' => $e->getFile(),
-        'baris_ke' => $e->getLine()
+        'status' => 'Topeng Berhasil Dibuka!',
+        'error_saat_ini' => $e->getMessage(),
+        'AKAR_MASALAH_ASLI' => $akarMasalah->getMessage(),
+        'file_penyebab' => $akarMasalah->getFile(),
+        'baris_ke' => $akarMasalah->getLine()
     ], JSON_PRETTY_PRINT);
     exit;
 }
