@@ -29,6 +29,8 @@ yarn-error.log
 
 # Laravel 4 specific
 bootstrap/compiled.php
+/bootstrap/cache/*.php
+bootstrap/cache/*.php
 app/storage/
 
 # Laravel 5 & Lumen specific
