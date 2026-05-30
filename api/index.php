@@ -1,6 +1,4 @@
 <?php
-$_SERVER['HTTP_ACCEPT'] = 'application/json';
-
 $storagePath = '/tmp/storage';
 
 $directories = [
@@ -23,4 +21,15 @@ putenv('APP_STORAGE=' . $storagePath);
 $_ENV['VIEW_COMPILED_PATH'] = $storagePath . '/framework/views';
 putenv('VIEW_COMPILED_PATH=' . $storagePath . '/framework/views');
 
-require __DIR__ . '/../public/index.php';
+try {
+    require __DIR__ . '/../public/index.php';
+} catch (\Throwable $e) {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'Pesan Error Asli Terbongkar!',
+        'error_message' => $e->getMessage(),
+        'file_penyebab' => $e->getFile(),
+        'baris_ke' => $e->getLine()
+    ], JSON_PRETTY_PRINT);
+    exit;
+}
