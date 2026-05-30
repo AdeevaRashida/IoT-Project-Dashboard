@@ -1,4 +1,5 @@
 <?php
+$_SERVER['HTTP_ACCEPT'] = 'application/json';
 
 $storagePath = '/tmp/storage';
 
