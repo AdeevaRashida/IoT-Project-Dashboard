@@ -26,8 +26,8 @@ class DashboardController extends Controller
             if ($response->successful() && $response->json() !== null) {
                 $profile = $response->json();
                 
-                if (isset($profile['no_hp'])) {
-                    $targetPhone = $profile['no_hp'];
+                if (isset($profile['phone'])) {
+                    $targetPhone = $profile['phone'];
                 }
                 
                 if (isset($profile['pet_name'])) {
@@ -71,8 +71,8 @@ class DashboardController extends Controller
             if ($response->successful() && $response->json() !== null) {
                 $profile = $response->json();
                 
-                if (isset($profile['no_hp'])) {
-                    $targetPhone = $profile['no_hp'];
+                if (isset($profile['phone'])) {
+                    $targetPhone = $profile['phone'];
                 }
                 
                 if (isset($profile['pet_name'])) {

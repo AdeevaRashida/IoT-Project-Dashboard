@@ -1484,7 +1484,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "{{ config('services.firebase.api_key') }}",
@@ -1560,8 +1560,7 @@
                 address: document.getElementById('inpAddress').value.trim(),
             };
 
-            // ✅ users/{uid}/profile
-            await set(userRef('profile'), data);
+            await update(userRef('profile'), data);
 
             document.getElementById('profileName').textContent = data.name || '(Belum diisi)';
             document.getElementById('profileEmail').textContent = data.email;
@@ -1622,12 +1621,17 @@
                 'Hapus Akun',
                 async () => {
                     if (uid) {
-                        // ✅ Hapus users/{uid} sekaligus (sudah benar)
                         await set(ref(db, 'users/' + uid), null);
-                        // ✅ Hapus devices/{deviceId} jika perlu
-                        // await set(ref(db, 'devices/pawfeeder_001'), null);
                     }
-                    await fetch('/logout');
+
+                    await fetch('{{ route("account.delete") }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
                     window.location.href = '{{ route("login") }}';
                 },
                 true // danger mode

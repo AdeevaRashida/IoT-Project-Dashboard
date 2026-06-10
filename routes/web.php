@@ -67,3 +67,5 @@ Route::get('/notifikasi', function () {
 Route::post('/notify-feeding', [DashboardController::class, 'notifyFeeding']);
 Route::post('/notify-low-stock', [DashboardController::class, 'notifyLowStock']);
 Route::post('/save-pet-name', [DashboardController::class, 'savePetName']);
+
+Route::post('/delete-account', [AuthController::class, 'deleteAccount'])->name('account.delete');

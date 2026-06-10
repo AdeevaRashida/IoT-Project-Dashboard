@@ -1465,7 +1465,7 @@
 
     // modal kalau user baru regist (gaada nama anabul, no_hp, dkk)
     <div class="modal-overlay" id="petNameModal" style="z-index:999; display: none;">
-        <div class="modal" style="text-align:center; background: #d4cfc6;">
+        <div class="modal" style="text-align:center;">
 
             <div id="stepPetName">
                 <div style="margin-bottom:12px">
@@ -2003,13 +2003,12 @@
             }
         });
 
-        //modal logic
-
+        
         onValue(userRef(''), (snapshot) => {
             const data = snapshot.val() || {};
             const profile = data.profile || {};
 
-            petName = profile.pet_name || "Anabul";
+            petName = profile.pet_name;
             const noHp = profile.phone;
             const deviceId = data.deviceId;
 
@@ -2059,8 +2058,6 @@
             try {
                 await set(ref(db, `users/${uid}/profile/pet_name`), name);
                 console.log("Nama berhasil disimpan!");
-                // Catatan: Kita tidak perlu memanggil showOnlyStep() lagi di sini, 
-                // karena onValue di atas akan otomatis mendeteksi perubahan dan memindahkan stepnya!
             } catch (error) {
                 console.error("Gagal menyimpan nama:", error);
             }
