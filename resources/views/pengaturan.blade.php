@@ -1500,7 +1500,6 @@
         const db = getDatabase(app);
         const uid = @json(session('firebase_uid'));
 
-        // Helper: path selalu di bawah users/{uid}/
         const userRef = (path) => ref(db, `users/${uid}/${path}`);
 
         // ===== LOAD DATA DARI FIREBASE =====
@@ -1532,7 +1531,6 @@
 
         async function loadNotifSettings() {
             if (!uid) return;
-            // ✅ users/{uid}/notif_settings (tidak berubah, tidak ada di struktur utama — boleh tetap)
             const snap = await get(userRef('notif_settings'));
             const data = snap.val() || {};
             document.querySelectorAll('.toggle[data-key]').forEach(btn => {
@@ -1597,7 +1595,6 @@
             const isOn = btn.classList.contains('active');
             const key = btn.dataset.key;
             if (key && uid) {
-                // ✅ users/{uid}/notif_settings/{key}
                 await set(userRef('notif_settings/' + key), isOn);
             }
             showToast(isOn ? 'Diaktifkan ✨' : 'Dinonaktifkan', isOn ? 'success' : 'warning');
@@ -1704,7 +1701,6 @@
             const data = await res.json();
             const url = data.secure_url;
 
-            // ✅ users/{uid}/profile_photo
             await set(userRef('profile_photo'), url);
 
             document.getElementById('avatarImg').src = url;
@@ -1717,7 +1713,6 @@
         // ===== HAPUS FOTO =====
         window.deletePhoto = async function () {
             if (!uid) return;
-            // ✅ users/{uid}/profile_photo
             await set(userRef('profile_photo'), null);
 
             document.getElementById('avatarImg').src = '';
@@ -1761,7 +1756,6 @@
         }
     </script>
 
-    <!-- Confirm Modal -->
     <div class="modal-overlay" id="confirmModal"
         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;">
         <div

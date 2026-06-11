@@ -1463,7 +1463,6 @@
     <div class="pet-deco top-right"><img src="{{ asset('images/matcha-cat.png') }}" alt="" class="float"></div>
     <div class="pet-deco bottom-left"><img src="{{ asset('images/paw-prints.png') }}" alt="" class="wiggle"></div>
 
-    // modal kalau user baru regist (gaada nama anabul, no_hp, dkk)
     <div class="modal-overlay" id="petNameModal" style="z-index:999; display: none;">
         <div class="modal" style="text-align:center;">
 
@@ -2100,7 +2099,9 @@
                 await set(ref(db, 'users/' + uid + '/deviceId'), input);
 
                 console.log("Device berhasil terhubung!");
-                alert("PawFeeder siap digunakan! 🐾");
+                
+                // Jangan pake alert, jelek
+                // alert("PawFeeder siap digunakan! 🐾");
 
             } catch (error) {
                 console.error("Error connecting device:", error);
