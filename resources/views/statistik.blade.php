@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1669,19 +1670,16 @@
                 const statusLabel = e.status === 'success' ? '✓ Berhasil' : '⚠ Terlambat';
 
                 let timeStr = e.time || '--:--';
+
                 if (e.timestamp) {
-                    const d = getWIB(e.timestamp);
-                    const todayStr = getWIBNow().toISOString().slice(0, 10);
-                    const entryStr = d.toISOString().slice(0, 10);
-                    const hh = String(d.getUTCHours()).padStart(2, '0');
-                    const mm = String(d.getUTCMinutes()).padStart(2, '0');
-                    const timeOnly = `${hh}:${mm}`;
-                    if (entryStr === todayStr) {
-                        timeStr = timeOnly;
-                    } else {
-                        const diffDays = Math.round((new Date(todayStr) - new Date(entryStr)) / 86400000);
-                        timeStr = diffDays === 1 ? `Kemarin ${timeOnly}` : `${diffDays}h lalu ${timeOnly}`;
-                    }
+                    const d = new Date(e.timestamp);
+
+                    const dateStr =
+                        String(d.getDate()).padStart(2, '0') + '/' +
+                        String(d.getMonth() + 1).padStart(2, '0') + '/' +
+                        d.getFullYear();
+
+                    timeStr = `${e.time || '--:--'} | ${dateStr}`;
                 }
 
                 return `
