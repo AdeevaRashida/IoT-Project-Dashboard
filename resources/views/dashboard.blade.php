@@ -1653,77 +1653,148 @@
         });
 
         // Manual feeding button
-        window.handleFeed = function () {
+        window.handleFeed = async function () {
             console.log('handleFeed dipanggil');
+
             if (isFeeding) return;
             isFeeding = true;
-            const portion = parseInt(document.getElementById('portionSlider').value);
-            const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            const currentPetName = document.querySelector('.pet-name')?.textContent || 'Anabul';
-            document.getElementById('notifFeedingText').textContent = `  Feeding berhasil! ${currentPetName} diberi makan ${portion}g pada ${time}`;
-            document.getElementById('notif-success').style.display = 'flex';
-            console.log('lanjut feeding...');
 
             const btn = document.getElementById('feedBtn');
             const txt = document.getElementById('feedBtnText');
-            btn.classList.add('feeding');
-            txt.textContent = 'Memberi makan... 🐾';
 
-            set(ref(db, 'users/' + uid + '/feedNow'), {
-                active: true,
-                portion: portion,
-                timestamp: Date.now()
-            });
+            const notifSuccess = document.getElementById('notif-success');
+            const notifFeedingText = document.getElementById('notifFeedingText');
 
-            const newWeight = Math.max(0, currentWeight - portion);
-            set(ref(db, 'users/' + uid + '/realtime/foodWeight'), newWeight);
-            currentWeight = newWeight;
+            const portionSlider = document.getElementById('portionSlider');
+            const currentPetName = document.querySelector('.pet-name')?.textContent || 'Anabul';
 
-            fetch('/notify-feeding', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
+            let interval = null;
+
+            try {
+                const portion = parseInt(portionSlider.value);
+
+                if (isNaN(portion) || portion <= 0) {
+                    throw new Error('Porsi makanan tidak valid.');
+                }
+
+                if (currentWeight <= 0) {
+                    throw new Error('Stok makanan sudah habis.');
+                }
+
+                if (portion > currentWeight) {
+                    throw new Error('Porsi melebihi stok makanan yang tersedia.');
+                }
+
+                btn.classList.add('feeding');
+                txt.textContent = 'Memberi makan... 🐾';
+
+                let dots = 0;
+                interval = setInterval(() => {
+                    dots = (dots + 1) % 4;
+                    txt.textContent = 'Memberi makan' + '.'.repeat(dots) + ' 🐾';
+                }, 400);
+
+                const time = new Date().toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const newWeight = Math.max(0, currentWeight - portion);
+
+                await set(ref(db, 'users/' + uid + '/feedNow'), {
+                    active: true,
                     portion: portion,
-                    weight: currentWeight
-                })
-            }).then(res => res.json())
-                .then(data => console.log('Notif response:', data))
-                .catch(err => console.error('Notif error:', err));
+                    timestamp: Date.now()
+                });
 
-            const waNow = new Date(new Date().getTime() + 7 * 3600000);
-            const waHH = String(waNow.getUTCHours()).padStart(2, '0');
-            const waMM = String(waNow.getUTCMinutes()).padStart(2, '0');
-            const waTimeStr = `${waHH}:${waMM}`;
-            set(ref(db, 'users/' + uid + '/realtime/waLastSent'), waTimeStr)
-                .then(() => console.log('waLastSent tersimpan:', waTimeStr))
-                .catch(err => console.error('GAGAL simpan waLastSent:', err));
+                await set(ref(db, 'users/' + uid + '/realtime/foodWeight'), newWeight);
 
-            push(ref(db, 'users/' + uid + '/history'), {
-                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-                type: 'manual',
-                portion: portion,
-                status: 'success',
-                weightAfter: newWeight,
-                timestamp: Date.now()
-            });
+                currentWeight = newWeight;
 
-            let dots = 0;
-            const interval = setInterval(() => {
-                dots = (dots + 1) % 4;
-                txt.textContent = 'Memberi makan' + '.'.repeat(dots) + ' 🐾';
-            }, 400);
+                const response = await fetch('/notify-feeding', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        portion: portion,
+                        weight: currentWeight
+                    })
+                });
 
-            setTimeout(() => {
-                clearInterval(interval);
+                if (!response.ok) {
+                    throw new Error('Gagal mengirim notifikasi feeding.');
+                }
+
+                const data = await response.json();
+                console.log('Notif response:', data);
+
+                const waTimeStr = new Date().toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                    timeZone: 'Asia/Jakarta'
+                });
+
+                await set(ref(db, 'users/' + uid + '/realtime/waLastSent'), waTimeStr);
+
+                await push(ref(db, 'users/' + uid + '/history'), {
+                    time: time,
+                    type: 'manual',
+                    portion: portion,
+                    status: 'success',
+                    weightAfter: newWeight,
+                    timestamp: Date.now()
+                });
+
+                notifFeedingText.textContent =
+                    `Feeding berhasil! ${currentPetName} diberi makan ${portion}g pada ${time}`;
+
+                notifSuccess.style.display = 'flex';
+
+                console.log('Feeding berhasil');
+
+            } catch (error) {
+                console.error('Feeding error:', error);
+
+                alert(error.message || 'Terjadi kesalahan saat melakukan feeding.');
+
+                try {
+                    await push(ref(db, 'users/' + uid + '/history'), {
+                        time: new Date().toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }),
+                        type: 'manual',
+                        portion: parseInt(portionSlider.value) || 0,
+                        status: 'failed',
+                        errorMessage: error.message || 'Unknown error',
+                        weightAfter: currentWeight,
+                        timestamp: Date.now()
+                    });
+                } catch (historyError) {
+                    console.error('Gagal menyimpan history error:', historyError);
+                }
+
+            } finally {
+                if (interval) {
+                    clearInterval(interval);
+                }
+
                 btn.classList.remove('feeding');
                 txt.textContent = 'Feed Now! 🍽️';
                 isFeeding = false;
-                set(ref(db, 'users/' + uid + '/feedNow'), { active: false });
-            }, 3000);
-        }
+
+                try {
+                    await set(ref(db, 'users/' + uid + '/feedNow'), {
+                        active: false
+                    });
+                } catch (resetError) {
+                    console.error('Gagal reset feedNow:', resetError);
+                }
+            }
+        };
 
         onValue(ref(db, 'users/' + uid + '/history'), (snapshot) => {
             const data = snapshot.val();
@@ -2002,7 +2073,7 @@
             }
         });
 
-        
+
         onValue(userRef(''), (snapshot) => {
             const data = snapshot.val() || {};
             const profile = data.profile || {};
@@ -2099,7 +2170,7 @@
                 await set(ref(db, 'users/' + uid + '/deviceId'), input);
 
                 console.log("Device berhasil terhubung!");
-                
+
                 // Jangan pake alert, jelek
                 // alert("PawFeeder siap digunakan! 🐾");
 
