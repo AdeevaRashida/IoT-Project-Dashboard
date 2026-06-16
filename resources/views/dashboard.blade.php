@@ -1239,6 +1239,15 @@
             <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
         </div>
 
+        <div class="notif-banner error fade-up delay-1" id="notif-error" style="display:none">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path
+                    d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <span id="notifErrorText">Feeding gagal!</span>
+            <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
+        </div>
+
         <!-- Row 1: Gauge + Feed Control + Quick Stats -->
         <div class="grid-3">
             <!-- Food Level Gauge -->
@@ -1665,6 +1674,9 @@
             const notifSuccess = document.getElementById('notif-success');
             const notifFeedingText = document.getElementById('notifFeedingText');
 
+            const notifError = document.getElementById('notif-error');
+            const notifErrorText = document.getElementById('notifErrorText');
+
             const portionSlider = document.getElementById('portionSlider');
             const currentPetName = document.querySelector('.pet-name')?.textContent || 'Anabul';
 
@@ -1748,6 +1760,8 @@
                     timestamp: Date.now()
                 });
 
+                document.getElementById('notif-error').style.display = 'none';
+
                 notifFeedingText.textContent =
                     `Feeding berhasil! ${currentPetName} diberi makan ${portion}g pada ${time}`;
 
@@ -1756,9 +1770,12 @@
                 console.log('Feeding berhasil');
 
             } catch (error) {
-                console.error('Feeding error:', error);
+                document.getElementById('notif-success').style.display = 'none';
 
-                alert(error.message || 'Terjadi kesalahan saat melakukan feeding.');
+                notifErrorText.textContent =
+                    error.message || 'Feeding gagal! Terjadi kesalahan.';
+
+                notifError.style.display = 'flex';
 
                 try {
                     await push(ref(db, 'users/' + uid + '/history'), {
