@@ -59,7 +59,7 @@ class AuthController extends Controller
         }
 
         $firebase->connectDevice('pawfeeder_001', [
-            'ownerId' => $result['localId'],
+            'ownerUid' => $result['localId'],
         ]);
 
         session([
