@@ -1555,8 +1555,8 @@
         const db = getDatabase(app);
         const uid = @json(session('firebase_uid'));
         let isFeeding = false;
-        let currentWeight = 75;
-        let maxCapacity = 100;
+        let currentWeight = 200;
+        let maxCapacity = 500;
 
         const userRef = (path) => ref(db, `users/${uid}/${path}`);
 

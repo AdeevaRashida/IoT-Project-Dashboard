@@ -1273,11 +1273,8 @@
                                     <input type="tel" id="inpPhone" value="08123456789" placeholder="08xx">
                                 </div>
                                 <div class="field">
-                                    <label>Bahasa</label>
-                                    <select id="inpLang">
-                                        <option value="id" selected>🇮🇩 Indonesia</option>
-                                        <option value="en">🇬🇧 English</option>
-                                    </select>
+                                    <label>Device ID</label>
+                                    <input type="tel" id="inpDeviceId" value="pawfeeder_001" placeholder="Device ID">
                                 </div>
                                 <div class="field full">
                                     <label>Alamat</label>
@@ -1501,6 +1498,7 @@
         const uid = @json(session('firebase_uid'));
 
         const userRef = (path) => ref(db, `users/${uid}/${path}`);
+        const deviceRef = (path) => ref(db, `devices/pawfeeder_001/`);
 
         // ===== LOAD DATA DARI FIREBASE =====
         async function loadProfile() {
@@ -1558,7 +1556,11 @@
                 address: document.getElementById('inpAddress').value.trim(),
             };
 
+            const deviceId = document.getElementById('inpDeviceId').value.trim();
+
             await update(userRef('profile'), data);
+            await update(userRef(''), { deviceId: deviceId });
+            await update(deviceRef(''), { ownerId: uid });
 
             document.getElementById('profileName').textContent = data.name || '(Belum diisi)';
             document.getElementById('profileEmail').textContent = data.email;

@@ -51,6 +51,15 @@ class FirebaseService
         return $response->json();
     }
 
+    public function connectDevice ($deviceId, $data)
+    {
+        $url = "{$this->databaseUrl}/devices/{$deviceId}.json?auth=" . session('firebase_token');
+
+        $response = Http::put($url, $data);
+
+        return $response->json();
+    }
+
     public function deleteAccount(string $idToken): array
     {
         $response = Http::post(

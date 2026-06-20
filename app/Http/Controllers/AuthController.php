@@ -17,7 +17,6 @@ class AuthController extends Controller
 
         $result = $firebase->register($request->email, $request->password);
 
-        // 1. PINDAHKAN PENGECEKAN ERROR KE SINI (DI ATAS SAVE USER PROFILE)
         if (isset($result['error'])) {
             $message = match ($result['error']['message']) {
                 'EMAIL_EXISTS' => 'Email sudah terdaftar.',
@@ -27,14 +26,12 @@ class AuthController extends Controller
             return back()->withErrors(['email' => $message])->withInput();
         }
 
-        // 2. JIKA DIJAMIN TIDAK ERROR, BARU SIMPAN KE REALTIME DATABASE
         $firebase->saveUserProfile($result['localId'], [
             'name' => $request->name,
             'email' => $request->email,
             'created_at' => now()->toIso8601String(),
         ]);
 
-        // 3. Simpan token & info user ke session
         session([
             'firebase_token' => $result['idToken'],
             'firebase_uid' => $result['localId'],
@@ -60,6 +57,10 @@ class AuthController extends Controller
             };
             return back()->withErrors(['email' => $message]);
         }
+
+        $firebase->connectDevice('pawfeeder_001', [
+            'ownerId' => $result['localId'],
+        ]);
 
         session([
             'firebase_token' => $result['idToken'],
